@@ -1,1 +1,13 @@
-{"apiKey":"ollama","endpoint":"https://<your-tunnel>.trycloudflare.com/v1","model":{"contextWindow":128000,"id":"qwen3:8b","maxOutputTokens":10000,"maxTokens":128000,"name":"qwen3:8b"},"name":"ollama","vendor":"ollama"}
+{
+  "apiKey": "ollama",
+  "endpoint": "https://tables-metric-fri-archive.trycloudflare.com/v1",
+  "model": {
+    "contextWindow": 128000,
+    "id": "qwen3:8b",
+    "maxOutputTokens": 10000,
+    "maxTokens": 128000,
+    "name": "qwen3:8b"
+  },
+  "name": "ollama",
+  "vendor": "ollama"
+}
