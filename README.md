@@ -61,11 +61,11 @@
 2. 在左侧工作流列表中选择 **Deploy Ollama on Kaggle**。
 3. 点击右侧的 **Run workflow** 下拉按钮：
    - **选择操作**：选择 `start`
-   - **自定义 ntfy 频道**（可选）：填入你习惯的频道名称（如留空则自动生成随机频道）
+   - **自定义 ntfy 频道**（可选）：ntfy_topicmy-secret-ollama-channel
 4. 点击绿色的 **Run workflow** 开始运行。GitHub 会在 10 秒内自动完成环境校验并将代码提交至 Kaggle 双 T4 GPU 节点启动！
 
 #### 3. 接收公网隧道 URL
-打开手机 ntfy App 或电脑浏览器访问 `https://ntfy.sh/<你的频道名>`，云端服务就绪后会收到推送消息，包含可直接使用的 `https://<随机>.trycloudflare.com/v1` 地址。
+打开手机 ntfy App 或电脑浏览器访问 `curl -d "Hello from Ollama" https://ntfy.sh/my-secret-ollama-channel`，云端服务就绪后会收到推送消息，包含可直接使用的 `https://<随机>.trycloudflare.com/v1` 地址。
 
 #### 4. 一键关机保存配额
 当你写完代码时，再次回到 GitHub **Actions** -> **Deploy Ollama on Kaggle** -> **Run workflow**，操作选择 `stop` 并点击运行，GitHub 会立刻向云端发送急停关机信号，**秒级停止扣除 Kaggle 每周 GPU 配额**！
