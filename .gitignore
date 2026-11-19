@@ -1,0 +1,20 @@
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+
+# Environment & credentials
+.env
+kaggle.json
+
+# Logs and runtime artifacts
+*.log
+*.deb
+/tmp/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
