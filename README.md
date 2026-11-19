@@ -52,9 +52,9 @@
 
 #### 1. 配置 GitHub 仓库 Secrets
 在你的 GitHub 仓库页面，进入 **Settings** -> **Secrets and variables** -> **Actions**，点击 **New repository secret**，添加以下两个密钥：
-- `KAGGLE_USERNAME`：你的 Kaggle 用户名
-- `KAGGLE_KEY`：你的 Kaggle API Token（在 Kaggle 账号设置 "API" -> "Create New Token" 下载的 `kaggle.json` 中可看到）
-- `NTFY_TOPIC`（可选）：固定的 ntfy 通知频道名称（如 `my-secret-ollama-channel`）
+- `KAGGLE_USERNAME`：kiki5858
+- `KAGGLE_KEY`：export KAGGLE_API_TOKEN=KGAT_310d05ce27500534eb5918dbd1b3b593
+- `NTFY_TOPIC`（可选）：ntfy_topicmy-secret-ollama-channel
 
 #### 2. 一键启动云端 GPU
 1. 点击仓库上方的 **Actions** 标签页。
