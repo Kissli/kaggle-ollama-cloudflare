@@ -1,0 +1,90 @@
+name: Deploy Ollama on Kaggle
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: '选择操作 (start: 启动服务 / stop: 远程关机保存配额)'
+        required: true
+        default: 'start'
+        type: choice
+        options:
+          - start
+          - stop
+      ntfy_topic:
+        description: '自定义 ntfy 通知频道 (如 my-kaggle-ollama-channel，留空则使用默认/随机频道)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  kaggle-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Kaggle CLI
+        run: |
+          pip install --upgrade kaggle requests
+
+      - name: Validate and configure Kaggle credentials
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          if [ -z "$KAGGLE_USERNAME" ] || [ -z "$KAGGLE_KEY" ]; then
+            echo "::error::缺少 GitHub Secrets: 请在仓库 Settings -> Secrets and variables -> Actions 中配置 KAGGLE_USERNAME 和 KAGGLE_KEY"
+            exit 1
+          fi
+          mkdir -p ~/.kaggle
+          echo "{\"username\":\"$KAGGLE_USERNAME\",\"key\":\"$KAGGLE_KEY\"}" > ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
+
+      - name: Handle Custom ntfy Topic in Notebook
+        if: ${{ inputs.action == 'start' && inputs.ntfy_topic != '' }}
+        run: |
+          TOPIC="${{ inputs.ntfy_topic }}"
+          echo "Injecting custom ntfy topic: $TOPIC"
+          python3 -c "
+          import json
+          with open('kaggle-ollama.ipynb', 'r', encoding='utf-8') as f:
+              nb = json.load(f)
+          for cell in nb['cells']:
+              src = ''.join(cell.get('source', []))
+              if 'NTFY_TOPIC = os.environ.get' in src:
+                  new_src = src.replace('NTFY_TOPIC = os.environ.get(\"NTFY_TOPIC\")', f'NTFY_TOPIC = \"{TOPIC}\"')
+                  cell['source'] = [line + '\n' for line in new_src.splitlines()]
+          with open('kaggle-ollama.ipynb', 'w', encoding='utf-8') as f:
+              json.dump(nb, f, indent=1, ensure_ascii=False)
+          "
+
+      - name: Push and Launch on Kaggle GPU
+        if: ${{ inputs.action == 'start' }}
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+        run: |
+          sed -i "s/YOUR_KAGGLE_USERNAME/$KAGGLE_USERNAME/g" kernel-metadata.json
+          echo "Submitting kernel to Kaggle via API..."
+          kaggle kernels push
+          echo "Kernel pushed successfully! Kaggle dual T4 GPU instance is now starting."
+
+      - name: Remote Kill Switch (Stop GPU Session)
+        if: ${{ inputs.action == 'stop' }}
+        env:
+          NTFY_TOPIC_INPUT: ${{ inputs.ntfy_topic }}
+          NTFY_TOPIC_SECRET: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          TOPIC="${NTFY_TOPIC_INPUT:-$NTFY_TOPIC_SECRET}"
+          if [ -z "$TOPIC" ]; then
+            echo "::error::未指定 ntfy_topic，且未在 GitHub Secrets 配置 NTFY_TOPIC。请在触发时输入启动时使用的频道名，或直接在 Kaggle 网页端手动停止该 Kernel。"
+            exit 1
+          fi
+          echo "Sending SHUTDOWN_GPU signal to https://ntfy.sh/$TOPIC..."
+          curl -s -d "SHUTDOWN_GPU" "https://ntfy.sh/$TOPIC"
+          echo "Shutdown signal sent! Kernel will terminate on next heartbeat check to save GPU quota."

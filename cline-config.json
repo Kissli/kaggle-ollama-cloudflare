@@ -1,11 +1,11 @@
 {
-  "apiKey": "ollama",
-  "endpoint": "https://tables-metric-fri-archive.trycloudflare.com/v1",
+  "apiKey": "none",
+  "endpoint": "https://<YOUR-TUNNEL-SUBDOMAIN>.trycloudflare.com/v1",
   "model": {
-    "contextWindow": 128000,
+    "contextWindow": 32768,
     "id": "qwen3:8b",
-    "maxOutputTokens": 10000,
-    "maxTokens": 128000,
+    "maxOutputTokens": 8192,
+    "maxTokens": 32768,
     "name": "qwen3:8b"
   },
   "name": "ollama",
